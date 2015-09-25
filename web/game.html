@@ -1,0 +1,14 @@
+<html>
+	<head>
+		<script src="/socket.io/socket.io.js"></script>
+		<script>
+var socket = io();
+socket.on('tick', function(msg) {
+	document.getElementById('tick').innerHTML = msg;
+});
+		</script>
+	</head>
+	<body>
+		Tick: <span id="tick">??</span>
+	</body>
+</html>

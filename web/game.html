@@ -6,9 +6,33 @@ var socket = io();
 socket.on('tick', function(msg) {
 	document.getElementById('tick').innerHTML = msg;
 });
+socket.on('pos', function(msg) {
+	document.getElementById('x').innerHTML = msg.x;
+	document.getElementById('y').innerHTML = msg.y;
+});
+
+var keys = {
+	87: 'up',
+	83: 'down',
+	65: 'left',
+	68: 'right',
+};
+
+document.addEventListener('keydown', function(e) {
+	if (keys[e.keyCode]) {
+		socket.emit('ctrldown', keys[e.keyCode]);
+	}
+});
+document.addEventListener('keyup', function(e) {
+	if (keys[e.keyCode]) {
+		socket.emit('ctrlup', keys[e.keyCode]);
+	}
+});
 		</script>
 	</head>
 	<body>
-		Tick: <span id="tick">??</span>
+		Tick: <span id="tick">??</span><br/>
+		X: <span id="x">???</span><br/>
+		Y: <span id="y">???</span><br/>
 	</body>
 </html>

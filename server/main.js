@@ -13,17 +13,49 @@ app.get('/', function(req, res) {
 players = {};
 
 io.on('connection', function(socket) {
-	console.log("User connection: " + socket.id);
-	players[socket.id] = socket;
+	var id = socket.id;
+	var player = {
+		socket: socket,
+		ctrl: {},
+		pos: {x: 0, y: 0},
+	};
+	players[id] = player;
+	
+	console.log("User connection: " + id);
+	
 	socket.on('disconnect', function() {
-		console.log("Disconnection: " + socket.id);
-		players[socket.id] = null;
+		console.log("Disconnection: " + id);
+		players[id] = null;
+		delete(players[id]);
+	});
+
+	socket.on('ctrldown', function(msg) {
+		player.ctrl[msg] = true;
+	});
+	socket.on('ctrlup', function(msg) {
+		player.ctrl[msg] = false;
 	});
 });
 
 var tick = 0;
 setInterval(function() {
 	io.emit('tick', tick++);
+	for (var id in players) {
+		var p = players[id];
+		if (p.ctrl.up) {
+			p.pos.y--;
+		}
+		if (p.ctrl.down) {
+			p.pos.y++;
+		}
+		if (p.ctrl.left) {
+			p.pos.x--;
+		}
+		if (p.ctrl.right) {
+			p.pos.x++;
+		}
+		p.socket.emit('pos', p.pos);
+	}
 }, 1000 / 30.0);
 
 

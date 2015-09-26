@@ -2,14 +2,48 @@
 	<head>
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
-var socket = io();
-socket.on('tick', function(msg) {
-	document.getElementById('tick').innerHTML = msg;
-});
-socket.on('pos', function(msg) {
-	document.getElementById('x').innerHTML = msg.x;
-	document.getElementById('y').innerHTML = msg.y;
-});
+var canvas;
+var ctx;
+var socket;
+var myPos = {};
+
+function init() {
+	canvas = document.getElementById('canvas');
+	ctx = canvas.getContext('2d');
+
+	socket = io();
+	socket.on('tick', function(msg) {
+		document.getElementById('tick').innerHTML = msg;
+	});
+	socket.on('pos', function(msg) {
+		myPos = msg;
+	});
+
+	socket.on('map', function(msg) {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		ctx.fillStyle = 'rgb(0,0,0)';
+		for (var i = 0; i < msg.objects.length; ++i) {
+			var obj = msg.objects[i];
+			ctx.beginPath();
+			ctx.arc(obj.x, obj.y, 10, 0, Math.PI * 2, false);
+			ctx.fill();
+		}
+
+		ctx.strokeStyle = 'rgb(255,255,0)';
+		var crossSize = 5;
+
+		ctx.beginPath();
+		ctx.moveTo(myPos.x - crossSize, myPos.y);
+		ctx.lineTo(myPos.x + crossSize, myPos.y);
+		ctx.stroke();
+
+		ctx.beginPath();
+		ctx.moveTo(myPos.x, myPos.y - crossSize);
+		ctx.lineTo(myPos.x, myPos.y + crossSize);
+		ctx.stroke();
+	});
+}
 
 var keys = {
 	87: 'up',
@@ -30,9 +64,8 @@ document.addEventListener('keyup', function(e) {
 });
 		</script>
 	</head>
-	<body>
+	<body onload="init()">
 		Tick: <span id="tick">??</span><br/>
-		X: <span id="x">???</span><br/>
-		Y: <span id="y">???</span><br/>
+		<canvas id="canvas"></canvas>
 	</body>
 </html>

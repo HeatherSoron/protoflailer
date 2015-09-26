@@ -40,6 +40,7 @@ io.on('connection', function(socket) {
 var tick = 0;
 setInterval(function() {
 	io.emit('tick', tick++);
+	var objects = [];
 	for (var id in players) {
 		var p = players[id];
 		if (p.ctrl.up) {
@@ -55,7 +56,11 @@ setInterval(function() {
 			p.pos.x++;
 		}
 		p.socket.emit('pos', p.pos);
+		objects.push(p.pos);
 	}
+	io.emit('map', {
+		objects: objects
+	});
 }, 1000 / 30.0);
 
 

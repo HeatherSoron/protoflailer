@@ -18,6 +18,10 @@ io.on('connection', function(socket) {
 		socket: socket,
 		ctrl: {},
 		pos: {x: 0, y: 0},
+		flail: {
+			body: {x: 0, y: 0, size: 5},
+			vel: {x: 0, y: 0},
+		},
 	};
 	players[id] = player;
 	
@@ -55,8 +59,37 @@ setInterval(function() {
 		if (p.ctrl.right) {
 			p.pos.x++;
 		}
+
+		var rebound = 0.1;
+		var swing = 1;
+
+		p.flail.vel.x += (p.pos.x - p.flail.body.x) * rebound;
+		p.flail.vel.y += (p.pos.y - p.flail.body.y) * rebound;
+		
+		console.log(p.flail.vel)
+
+		if (Math.abs(p.flail.vel.x) < 0.5) {
+			p.flail.vel.x = 0;
+		}
+		p.flail.body.x += p.flail.vel.x;
+
+		if (Math.abs(p.flail.vel.y) < 0.5) {
+			p.flail.vel.y = 0;
+		}
+		p.flail.body.y += p.flail.vel.y;
+
+		if (p.ctrl.action) {
+			if (!p.flail.flung) {
+				
+			}
+			p.flail.flung = true;
+		} else {
+			p.flail.flung = false;
+		}
+
 		p.socket.emit('pos', p.pos);
 		objects.push(p.pos);
+		objects.push(p.flail.body);
 	}
 	io.emit('map', {
 		objects: objects

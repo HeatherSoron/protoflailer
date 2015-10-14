@@ -26,7 +26,7 @@ function init() {
 		for (var i = 0; i < msg.objects.length; ++i) {
 			var obj = msg.objects[i];
 			ctx.beginPath();
-			ctx.arc(obj.x, obj.y, 10, 0, Math.PI * 2, false);
+			ctx.arc(obj.x, obj.y, obj.size ? obj.size : 10, 0, Math.PI * 2, false);
 			ctx.fill();
 		}
 

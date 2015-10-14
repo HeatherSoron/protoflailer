@@ -62,6 +62,36 @@ document.addEventListener('keyup', function(e) {
 		socket.emit('ctrlup', keys[e.keyCode]);
 	}
 });
+
+var gamepadIndex = 0;
+
+var gpButtons = {
+	action: 0,
+	up: 12,
+	down: 13,
+	left: 14,
+	right: 15,
+}
+var gpButtonState = {};
+function renderLoop() {
+	var gamepad = navigator.getGamepads()[gamepadIndex];
+	if (gamepad) {
+		for (var key in gpButtons) {
+			var pressed = gamepad.buttons[gpButtons[key]].value;
+			if (gpButtonState[key] && !pressed) {
+				socket.emit('ctrlup', key);
+			}
+			if (!gpButtonState[key] && pressed) {
+				socket.emit('ctrldown', key);
+			}
+			gpButtonState[key] = pressed;
+		}
+	}
+	requestAnimationFrame(renderLoop);
+}
+
+requestAnimationFrame(renderLoop);
+
 		</script>
 	</head>
 	<body onload="init()">

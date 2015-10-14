@@ -62,21 +62,25 @@ setInterval(function() {
 
 		var rebound = 0.1;
 		var swing = 1;
+		var friction = 0.01;
 
-		p.flail.vel.x += (p.pos.x - p.flail.body.x) * rebound;
-		p.flail.vel.y += (p.pos.y - p.flail.body.y) * rebound;
-		
-		console.log(p.flail.vel)
+		// doing velocity on the two linear components, separately, is NOT physically accurate.
+		// so, eventually, we do want to get a proper Point class in here, and do it THAT way
+		// but, this will do for a start
+		function doVel(comp) {
+			var accel = (p.pos[comp] - p.flail.body[comp]) * rebound;
+			if (Math.abs(accel) > 0.1) {
+				p.flail.vel[comp] += accel;
+			}
 
-		if (Math.abs(p.flail.vel.x) < 0.5) {
-			p.flail.vel.x = 0;
+			p.flail.vel[comp] *= (1 - friction);
+			if (Math.abs(p.flail.vel[comp]) < 0.5) {
+				p.flail.vel[comp] = 0;
+			}
+			p.flail.body[comp] += p.flail.vel[comp];
 		}
-		p.flail.body.x += p.flail.vel.x;
-
-		if (Math.abs(p.flail.vel.y) < 0.5) {
-			p.flail.vel.y = 0;
-		}
-		p.flail.body.y += p.flail.vel.y;
+		doVel('x');
+		doVel('y');
 
 		if (p.ctrl.action) {
 			if (!p.flail.flung) {

@@ -9,6 +9,8 @@ app.get('/', function(req, res) {
 	res.send('Hello, world');
 });
 
+var geom = require('./geometry');
+
 
 players = {};
 
@@ -17,12 +19,15 @@ io.on('connection', function(socket) {
 	var player = {
 		socket: socket,
 		ctrl: {},
-		pos: {x: 0, y: 0},
+		pos: new geom.Point(),
 		flail: {
-			body: {x: 0, y: 0, size: 5},
-			vel: {x: 0, y: 0},
+			body: new geom.Point(),
+			vel: new geom.Point(),
 		},
 	};
+	// add a member variable for the client to make use of
+	player.flail.body.size = 5;
+
 	players[id] = player;
 	
 	console.log("User connection: " + id);
@@ -64,23 +69,17 @@ setInterval(function() {
 		var swing = 1;
 		var friction = 0.01;
 
-		// doing velocity on the two linear components, separately, is NOT physically accurate.
-		// so, eventually, we do want to get a proper Point class in here, and do it THAT way
-		// but, this will do for a start
-		function doVel(comp) {
-			var accel = (p.pos[comp] - p.flail.body[comp]) * rebound;
-			if (Math.abs(accel) > 0.1) {
-				p.flail.vel[comp] += accel;
-			}
 
-			p.flail.vel[comp] *= (1 - friction);
-			if (Math.abs(p.flail.vel[comp]) < 0.5) {
-				p.flail.vel[comp] = 0;
-			}
-			p.flail.body[comp] += p.flail.vel[comp];
+		var accel = p.pos.minus(p.flail.body).times(rebound);
+		if (accel.lenSqrd() > 0.1) {
+			p.flail.vel.offsetBy(accel);
 		}
-		doVel('x');
-		doVel('y');
+		p.flail.vel.scaleBy(1 - friction);
+		if (p.flail.vel.lenSqrd() < 0.5) {
+			p.flail.vel = new geom.Point();
+		}
+		p.flail.body.offsetBy(p.flail.vel);
+
 
 		if (p.ctrl.action) {
 			if (!p.flail.flung) {

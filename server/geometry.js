@@ -86,3 +86,7 @@ Rectangle.prototype.intersects = function(other) {
 Rectangle.prototype.clone = function() {
 	return new Rectangle(this.left, this.top, this.width, this.height);
 }
+
+
+module.exports.Point = Point;
+module.exports.Rectangle = Rectangle;

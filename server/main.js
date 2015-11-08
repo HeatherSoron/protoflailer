@@ -83,7 +83,9 @@ setInterval(function() {
 
 		if (p.ctrl.action) {
 			if (!p.flail.flung) {
-				
+				if (!p.flail.vel.isZero()) {
+					p.flail.vel.offsetBy(p.flail.vel.normalize().times(2));
+				}
 			}
 			p.flail.flung = true;
 		} else {

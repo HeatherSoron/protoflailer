@@ -20,6 +20,12 @@ Point.prototype.isZero = function() {
 	return !(this.x || this.y);
 }
 
+Point.prototype.scaleBy = function(mult) {
+	this.x *= mult;
+	this.y *= mult;
+	return this;
+}
+
 Point.prototype.times = function(mult) {
 	return new Point(this.x * mult, this.y * mult);
 }

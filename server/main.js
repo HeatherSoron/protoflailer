@@ -11,11 +11,12 @@ app.get('/', function(req, res) {
 
 var geom = require('./geometry');
 
-var map = new geom.Rectangle(0, 0, 300, 150);
+var map = new geom.Rectangle(0, 0, 350, 350);
 
 players = {};
 
 io.on('connection', function(socket) {
+	socket.emit('mapDef', map);
 	var id = socket.id;
 	var colorComps = [];
 	for (var i = 0; i < 3; ++i) {

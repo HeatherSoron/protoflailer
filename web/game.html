@@ -22,9 +22,11 @@ function init() {
 	socket.on('map', function(msg) {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-		ctx.fillStyle = 'rgb(0,0,0)';
+		var defaultFill = 'rgb(0,0,0)';
+		ctx.fillStyle = defaultFill;
 		for (var i = 0; i < msg.objects.length; ++i) {
 			var obj = msg.objects[i];
+			ctx.fillStyle = obj.color ? obj.color : defaultFill;
 			ctx.beginPath();
 			ctx.arc(obj.x, obj.y, obj.size ? obj.size : 10, 0, Math.PI * 2, false);
 			ctx.fill();

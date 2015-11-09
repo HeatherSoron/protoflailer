@@ -16,6 +16,10 @@ players = {};
 
 io.on('connection', function(socket) {
 	var id = socket.id;
+	var colorComps = [];
+	for (var i = 0; i < 3; ++i) {
+		colorComps.push(Math.floor(Math.random() * 256));
+	}
 	var player = {
 		socket: socket,
 		ctrl: {},
@@ -25,8 +29,10 @@ io.on('connection', function(socket) {
 			vel: new geom.Point(),
 		},
 	};
-	// add a member variable for the client to make use of
+	// add a couple member variables for the client to make use of
 	player.flail.body.size = 5;
+	player.pos.color = 'rgb(' + colorComps.join(',') + ')';
+	player.flail.body.color = 'rgb(' + colorComps.map(function(val) { return Math.floor(val * 0.9);}).join(',') + ')';
 
 	players[id] = player;
 	
@@ -83,8 +89,10 @@ setInterval(function() {
 
 		if (p.ctrl.action) {
 			if (!p.flail.flung) {
-				if (!p.flail.vel.isZero()) {
-					p.flail.vel.offsetBy(p.flail.vel.normalize().times(2));
+				var dir = p.pos.minus(p.flail.body);
+				if (!dir.isZero()) {
+					dir = dir.normalize();
+					p.flail.vel.offsetBy(dir.times(2));
 				}
 			}
 			p.flail.flung = true;

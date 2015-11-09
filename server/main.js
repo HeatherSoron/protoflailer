@@ -30,6 +30,7 @@ io.on('connection', function(socket) {
 		},
 	};
 	// add a couple member variables for the client to make use of
+	player.pos.size = 10;
 	player.flail.body.size = 5;
 	player.pos.color = 'rgb(' + colorComps.join(',') + ')';
 	player.flail.body.color = 'rgb(' + colorComps.map(function(val) { return Math.floor(val * 0.9);}).join(',') + ')';
@@ -85,6 +86,24 @@ setInterval(function() {
 			p.flail.vel = new geom.Point();
 		}
 		p.flail.body.offsetBy(p.flail.vel);
+
+		// INSPIRATION:
+		// http://worldbuilding.stackexchange.com/questions/17239/how-to-make-flashy-fighting-practical-fighting?rq=1
+
+		// this is not going to be efficient, but oh well
+		for (var otherId in players) {
+			if (otherId == id) {
+				continue;
+			}
+			var other = players[otherId];
+			var offset = other.pos.minus(p.flail.body);
+			var dist = offset.length();
+			if (dist < other.pos.size + p.flail.body.size) {
+				other.pos.offsetBy(p.flail.vel.times(2));
+				var speed = p.flail.vel.length();
+				p.flail.vel = offset.normalize().times(speed);
+			}
+		}
 
 
 		if (p.ctrl.action) {

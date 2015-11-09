@@ -11,6 +11,7 @@ app.get('/', function(req, res) {
 
 var geom = require('./geometry');
 
+var map = new geom.Rectangle(0, 0, 300, 150);
 
 players = {};
 
@@ -72,6 +73,8 @@ setInterval(function() {
 			p.pos.x++;
 		}
 
+		p.pos.clampTo(map);
+
 		var rebound = 0.1;
 		var swing = 1;
 		var friction = 0.01;
@@ -86,9 +89,6 @@ setInterval(function() {
 			p.flail.vel = new geom.Point();
 		}
 		p.flail.body.offsetBy(p.flail.vel);
-
-		// INSPIRATION:
-		// http://worldbuilding.stackexchange.com/questions/17239/how-to-make-flashy-fighting-practical-fighting?rq=1
 
 		// this is not going to be efficient, but oh well
 		for (var otherId in players) {

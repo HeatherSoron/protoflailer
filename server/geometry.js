@@ -59,6 +59,20 @@ Point.prototype.clone = function() {
 	return new Point(this.x, this.y);
 }
 
+Point.prototype.clampTo = function(rect) {
+	if (this.x < rect.left) {
+		this.x = rect.left;
+	} else if (this.x > rect.left + rect.width) {
+		this.x = rect.left + rect.width;
+	}
+
+	if (this.y < rect.top) {
+		this.y = rect.top;
+	} else if (this.y > rect.top + rect.height) {
+		this.y = rect.top + rect.height;
+	}
+}
+
 
 
 

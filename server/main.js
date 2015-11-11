@@ -104,7 +104,10 @@ setInterval(function() {
 				var dir = p.pos.minus(p.flail.body);
 				if (!dir.isZero()) {
 					dir = dir.normalize();
-					p.flail.vel.offsetBy(dir.times(2));
+					var newVel = p.flail.vel.plus(dir.times(2));
+					if (newVel.lenSqrd() > p.flail.vel.lenSqrd()) {
+						p.flail.vel = newVel;
+					}
 				}
 			}
 			p.flail.flung = true;

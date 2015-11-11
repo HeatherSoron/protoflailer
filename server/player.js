@@ -1,4 +1,5 @@
 var geom = require('./geometry');
+var bounds = require('./map').bounds;
 
 function Player(socket) {
 	var colorComps = [];
@@ -21,6 +22,73 @@ function Player(socket) {
 	this.flail.body.size = 5;
 	this.pos.color = 'rgb(' + colorComps.join(',') + ')';
 	this.flail.body.color = 'rgb(' + colorComps.map(function(val) { return Math.floor(val * 0.9);}).join(',') + ')';
+}
+
+Player.prototype.move = function() {
+	if (this.ctrl.up) {
+		this.pos.y--;
+	}
+	if (this.ctrl.down) {
+		this.pos.y++;
+	}
+	if (this.ctrl.left) {
+		this.pos.x--;
+	}
+	if (this.ctrl.right) {
+		this.pos.x++;
+	}
+
+	var clampDist = this.pos.clampTo(bounds);
+	this.health -= clampDist.length();
+}
+
+Player.prototype.swing = function() {
+	var rebound = 0.1;
+	var swing = 1;
+	var friction = 0.01;
+
+
+	var accel = this.pos.minus(this.flail.body).times(rebound);
+	if (accel.lenSqrd() > 0.1) {
+		this.flail.vel.offsetBy(accel);
+	}
+	this.flail.vel.scaleBy(1 - friction);
+	if (this.flail.vel.lenSqrd() < 0.5) {
+		this.flail.vel = new geom.Point();
+	}
+	this.flail.body.offsetBy(this.flail.vel);
+
+	// this is not going to be efficient, but oh well
+	for (var otherId in players) {
+		if (otherId == this.socket.id) {
+			continue;
+		}
+		var other = players[otherId];
+		var offset = other.pos.minus(this.flail.body);
+		var dist = offset.length();
+		if (dist < other.pos.size + this.flail.body.size) {
+			other.pos.offsetBy(this.flail.vel.times(2));
+			var speed = this.flail.vel.length();
+			this.flail.vel = offset.normalize().times(speed);
+		}
+	}
+
+
+	if (this.ctrl.action) {
+		if (!this.flail.flung) {
+			var dir = this.pos.minus(this.flail.body);
+			if (!dir.isZero()) {
+				dir = dir.normalize();
+				var newVel = this.flail.vel.plus(dir.times(2));
+				if (newVel.lenSqrd() > this.flail.vel.lenSqrd()) {
+					this.flail.vel = newVel;
+				}
+			}
+		}
+		this.flail.flung = true;
+	} else {
+		this.flail.flung = false;
+	}
 }
 
 module.exports.Player = Player;

@@ -60,17 +60,23 @@ Point.prototype.clone = function() {
 }
 
 Point.prototype.clampTo = function(rect) {
+	var offset = new Point();
 	if (this.x < rect.left) {
+		offset.x = rect.left - this.x;
 		this.x = rect.left;
 	} else if (this.x > rect.left + rect.width) {
+		offset.x = this.x - (rect.left + rect.width);
 		this.x = rect.left + rect.width;
 	}
 
 	if (this.y < rect.top) {
+		offset.y = rect.top - this.y;
 		this.y = rect.top;
 	} else if (this.y > rect.top + rect.height) {
+		offset.y = this.y - (rect.top + rect.height);
 		this.y = rect.top + rect.height;
 	}
+	return offset;
 }
 
 
@@ -105,6 +111,10 @@ Rectangle.prototype.intersects = function(other) {
 
 Rectangle.prototype.clone = function() {
 	return new Rectangle(this.left, this.top, this.width, this.height);
+}
+
+Rectangle.prototype.shrink = function(left, top, width, height) {
+	return new Rectangle(this.left + left, this.top + top, this.width - (left + width), this.height - (top + height));
 }
 
 

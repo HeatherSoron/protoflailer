@@ -32,12 +32,23 @@ function init() {
 		for (var i = 0; i < msg.objects.length; ++i) {
 			var obj = msg.objects[i];
 			ctx.fillStyle = obj.color ? obj.color : defaultFill;
+			var fillAngle = Math.PI * 2;
 			ctx.beginPath();
-			ctx.arc(obj.x, obj.y, obj.size ? obj.size : 10, 0, Math.PI * 2, false);
+			ctx.arc(obj.x, obj.y, obj.size ? obj.size : 10, 0, fillAngle, false);
 			ctx.fill();
+
+			if ('fillPercent' in obj) {
+				ctx.strokeStyle = 'rgba(180,0,0,0.8)';
+				ctx.lineWidth = 4;
+				fillAngle *= obj.fillPercent;
+				ctx.beginPath();
+				ctx.arc(obj.x, obj.y, obj.size ? obj.size : 10, 0, fillAngle, false);
+				ctx.stroke();
+			}
 		}
 
 		ctx.strokeStyle = 'rgb(255,255,0)';
+		ctx.lineWidth = 1;
 		var crossSize = 5;
 
 		ctx.beginPath();

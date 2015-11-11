@@ -10,32 +10,17 @@ app.get('/', function(req, res) {
 });
 
 var geom = require('./geometry');
+var Player = require('./player').Player;
 
 var map = new geom.Rectangle(0, 0, 350, 350);
+var bounds = map.shrink(10, 10, 10, 10);
 
 players = {};
 
 io.on('connection', function(socket) {
 	socket.emit('mapDef', map);
 	var id = socket.id;
-	var colorComps = [];
-	for (var i = 0; i < 3; ++i) {
-		colorComps.push(Math.floor(Math.random() * 256));
-	}
-	var player = {
-		socket: socket,
-		ctrl: {},
-		pos: new geom.Point(),
-		flail: {
-			body: new geom.Point(),
-			vel: new geom.Point(),
-		},
-	};
-	// add a couple member variables for the client to make use of
-	player.pos.size = 10;
-	player.flail.body.size = 5;
-	player.pos.color = 'rgb(' + colorComps.join(',') + ')';
-	player.flail.body.color = 'rgb(' + colorComps.map(function(val) { return Math.floor(val * 0.9);}).join(',') + ')';
+	var player = new Player(socket);
 
 	players[id] = player;
 	
@@ -74,7 +59,14 @@ setInterval(function() {
 			p.pos.x++;
 		}
 
-		p.pos.clampTo(map);
+		var clampDist = p.pos.clampTo(bounds);
+		p.health -= clampDist.length();
+
+		// maybe clean up the death to be less fragile?
+		if (p.health < 0) {
+			delete players[id];
+			continue;
+		}
 
 		var rebound = 0.1;
 		var swing = 1;
@@ -121,6 +113,8 @@ setInterval(function() {
 		}
 
 		p.socket.emit('pos', p.pos);
+		// TODO clean this up to be on the player, not the point
+		p.pos.fillPercent = p.health / p.maxHealth;
 		objects.push(p.pos);
 		objects.push(p.flail.body);
 	}

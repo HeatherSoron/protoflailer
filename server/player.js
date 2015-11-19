@@ -68,12 +68,19 @@ Player.prototype.swing = function() {
 		var other = players[otherId];
 		var offset = other.pos.minus(this.flail.body);
 		var dist = offset.length();
-		if (dist < other.pos.size + this.flail.body.size) {
-			var blowVec = this.flail.vel.times(2);
-			other.pos.offsetBy(blowVec);
-			other.flail.body.offsetBy(blowVec);
+		var effectiveSize = other.pos.size + this.flail.body.size;
+		if (dist < effectiveSize && false) {
+			other.slam(this.flail.vel);
 			var speed = this.flail.vel.length();
+			// what was this for again...? note to self: remember that, and comment it, next time
 			this.flail.vel = offset.normalize().times(speed);
+		} else {
+			var lineDir = this.pos.minus(this.flail.body).normalize();
+			var perpendicular = new geom.Point(-lineDir.y, lineDir.x);
+			var distToLine = Math.abs(offset.dot(perpendicular));
+			if (distToLine < effectiveSize) {
+				other.slam(this.flail.vel);
+			}
 		}
 	}
 
@@ -91,6 +98,12 @@ Player.prototype.swing = function() {
 	} else {
 		this.flail.flung = false;
 	}
+}
+
+Player.prototype.slam = function(vel) {
+	var blowVec = vel.times(2);
+	this.pos.offsetBy(blowVec);
+	this.flail.body.offsetBy(blowVec);
 }
 
 Player.prototype.findNearestOther = function() {

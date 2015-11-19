@@ -79,7 +79,9 @@ Point.prototype.clampTo = function(rect) {
 	return offset;
 }
 
-
+Point.prototype.dot = function(other) {
+	return this.x * other.x + this.y * other.y;
+}
 
 
 function Rectangle(left, top, width, height) {

@@ -24,6 +24,7 @@ function init() {
 		canvas.height = msg.height;
 	});
 
+	// TODO: completely rewrite the map render to NOT BE A HACK
 	socket.on('map', function(msg) {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -31,12 +32,26 @@ function init() {
 		ctx.fillStyle = defaultFill;
 		for (var i = 0; i < msg.objects.length; ++i) {
 			var obj = msg.objects[i];
-			ctx.fillStyle = obj.color ? obj.color : defaultFill;
 			var fillAngle = Math.PI * 2;
+			ctx.fillStyle = obj.color ? obj.color : defaultFill;
 			ctx.beginPath();
 			ctx.arc(obj.x, obj.y, obj.size ? obj.size : 10, 0, fillAngle, false);
 			ctx.fill();
 
+			// connect flail to player body
+			if ('connectTo' in obj) {
+				ctx.beginPath();
+				ctx.lineCap = 'round';
+				// lineWidth is diam, size is radius
+				// we want the line to be thinner, so leave it as-is
+				ctx.lineWidth = obj.size ? obj.size : 10;
+				ctx.strokeStyle = obj.color ? obj.color : defaultFill;
+				ctx.moveTo(obj.x, obj.y);
+				ctx.lineTo(obj.connectTo.x, obj.connectTo.y);
+				ctx.stroke();
+			}
+
+			// draw health
 			if ('fillPercent' in obj) {
 				ctx.strokeStyle = 'rgba(180,0,0,0.8)';
 				ctx.lineWidth = 4;

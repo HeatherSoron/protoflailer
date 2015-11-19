@@ -61,6 +61,8 @@ setInterval(function() {
 		// TODO clean this up to be on the player, not the point
 		p.pos.fillPercent = p.health / p.maxHealth;
 		targets[id] = objects.length;
+		// HACKITY HACK CLEAN UP THE RENDER CODE
+		p.flail.body.connectTo = p.pos;
 		objects.push(p.pos);
 		objects.push(p.flail.body);
 	}

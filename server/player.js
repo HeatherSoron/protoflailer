@@ -69,17 +69,24 @@ Player.prototype.swing = function() {
 		var offset = other.pos.minus(this.flail.body);
 		var dist = offset.length();
 		var effectiveSize = other.pos.size + this.flail.body.size;
-		if (dist < effectiveSize && false) {
+		if (dist < effectiveSize) {
+			// flail-player collision, nice and simple
 			other.slam(this.flail.vel);
 			var speed = this.flail.vel.length();
 			// what was this for again...? note to self: remember that, and comment it, next time
 			this.flail.vel = offset.normalize().times(speed);
 		} else {
-			var lineDir = this.pos.minus(this.flail.body).normalize();
-			var perpendicular = new geom.Point(-lineDir.y, lineDir.x);
-			var distToLine = Math.abs(offset.dot(perpendicular));
-			if (distToLine < effectiveSize) {
-				other.slam(this.flail.vel);
+			// check for chain-player collisions now
+
+			// okay, this whole block? This is NOT the right way to do line-circle intersections. I'm FAIRLY sure it's buggy. But, it gives good enough results for a nearly-midnight live coding session.
+			var line = this.pos.minus(this.flail.body);
+			if (line.lenSqrd() > this.pos.minus(other.pos).lenSqrd()) {
+				var lineDir = line.normalize();
+				var distToLine = Math.abs(offset.dot(lineDir));
+				if (distToLine < effectiveSize) {
+					console.log(distToLine, effectiveSize);
+					other.slam(this.flail.vel);
+				}
 			}
 		}
 	}

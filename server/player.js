@@ -67,7 +67,9 @@ Player.prototype.swing = function() {
 		var offset = other.pos.minus(this.flail.body);
 		var dist = offset.length();
 		if (dist < other.pos.size + this.flail.body.size) {
-			other.pos.offsetBy(this.flail.vel.times(2));
+			var blowVec = this.flail.vel.times(2);
+			other.pos.offsetBy(blowVec);
+			other.flail.body.offsetBy(blowVec);
 			var speed = this.flail.vel.length();
 			this.flail.vel = offset.normalize().times(speed);
 		}

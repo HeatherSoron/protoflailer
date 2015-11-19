@@ -58,6 +58,8 @@ Player.prototype.swing = function() {
 	}
 	this.flail.body.offsetBy(this.flail.vel);
 
+	/* check if any other player is hit by our flail */
+
 	// this is not going to be efficient, but oh well
 	for (var otherId in players) {
 		if (otherId == this.socket.id) {
@@ -78,19 +80,36 @@ Player.prototype.swing = function() {
 
 	if (this.ctrl.action) {
 		if (!this.flail.flung) {
-			var dir = this.pos.minus(this.flail.body);
-			if (!dir.isZero()) {
-				dir = dir.normalize();
-				var newVel = this.flail.vel.plus(dir.times(2));
-				if (newVel.lenSqrd() > this.flail.vel.lenSqrd()) {
-					this.flail.vel = newVel;
-				}
+			var nearest = this.findNearestOther();
+			if (nearest) {
+				var speed = this.flail.vel.length();
+				var dir = nearest.pos.minus(this.flail.body);
+				this.flail.vel = dir.normalize().times(speed);
 			}
 		}
 		this.flail.flung = true;
 	} else {
 		this.flail.flung = false;
 	}
+}
+
+Player.prototype.findNearestOther = function() {
+	var nearest = null;
+	// the dist doesn't actually need to be stored, but caching it could help performance
+	var nearestDistSqr;
+	for (var otherId in players) {
+		if (otherId == this.socket.id) {
+			continue;
+		}
+		var other = players[otherId];
+		var offset = other.pos.minus(this.pos);
+		var distSqr = offset.lenSqrd();
+		if (nearest === null || distSqr < nearestDistSqr) {
+			nearest = other;
+			nearestDistSqr = distSqr;
+		}
+	}
+	return nearest;
 }
 
 module.exports.Player = Player;
